@@ -25,14 +25,15 @@ import android.net.Uri;
 import android.os.Build;
 import android.os.Bundle;
 import android.os.Environment;
-import android.support.v4.app.FragmentActivity;
-import android.support.v4.app.FragmentManager;
-import android.support.v4.app.FragmentManager.BackStackEntry;
-import android.support.v4.app.FragmentManager.OnBackStackChangedListener;
-import android.support.v4.app.FragmentTransaction;
+
 import android.view.Menu;
 import android.view.MenuItem;
 import android.widget.Toast;
+
+
+import androidx.fragment.app.FragmentActivity;
+import androidx.fragment.app.FragmentManager;
+import androidx.fragment.app.FragmentTransaction;
 
 import java.io.File;
 
@@ -43,7 +44,7 @@ import java.io.File;
  * @author paulburke (ipaulpro)
  */
 public class FileChooserActivity extends FragmentActivity implements
-        OnBackStackChangedListener, FileListFragment.Callbacks {
+        FragmentManager.OnBackStackChangedListener, FileListFragment.Callbacks {
 
     public static final String PATH = "path";
     public static final String EXTERNAL_BASE_PATH = Environment
@@ -105,7 +106,7 @@ public class FileChooserActivity extends FragmentActivity implements
 
         int count = mFragmentManager.getBackStackEntryCount();
         if (count > 0) {
-            BackStackEntry fragment = mFragmentManager.getBackStackEntryAt(count - 1);
+            FragmentManager.BackStackEntry fragment = mFragmentManager.getBackStackEntryAt(count - 1);
             mPath = fragment.getName();
         } else {
             mPath = EXTERNAL_BASE_PATH;
@@ -123,7 +124,9 @@ public class FileChooserActivity extends FragmentActivity implements
 
             ActionBar actionBar = getActionBar();
             actionBar.setDisplayHomeAsUpEnabled(hasBackStack);
-            actionBar.setHomeButtonEnabled(hasBackStack);
+            if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.ICE_CREAM_SANDWICH) {
+                actionBar.setHomeButtonEnabled(hasBackStack);
+            }
         }
 
         return true;

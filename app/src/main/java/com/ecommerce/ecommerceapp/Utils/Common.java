@@ -15,7 +15,7 @@ import java.util.List;
 public class Common {
 //    For emulator ,localhost = 10.0.2.2
 //    ip address , localst = 192.168.237.2,192.168.43.183,192.168.56.1
-    public static final String BASE_URL = "http://192.168.9.101/ecommerce/";
+    public static final String BASE_URL = "http://192.168.0.103/drinksApi/";
 
     public static final String TOPPING_MENU_ID="7";
 
@@ -45,4 +45,21 @@ public class Common {
 
     }
 
+    public static String convertCodeToStatus(int orderStatus) {
+        switch(orderStatus)
+        {
+            case 0:
+                return "Placed";
+            case 1:
+                return "Processing";
+            case 2:
+                return "Shipping";
+            case 3:
+                return "Shipped";
+            case -1:
+                return "Cancelled";
+            default:
+                return "Order Error";
+        }
+    }
 }

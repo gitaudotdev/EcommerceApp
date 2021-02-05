@@ -1,8 +1,8 @@
 package com.ecommerce.ecommerceapp.Adapters;
 
 import android.content.Context;
-import android.support.annotation.NonNull;
-import android.support.v7.widget.RecyclerView;
+import androidx.annotation.NonNull;
+import androidx.recyclerview.widget.RecyclerView;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -13,7 +13,6 @@ import android.widget.TextView;
 
 import com.cepheuen.elegantnumberbutton.view.ElegantNumberButton;
 import com.ecommerce.ecommerceapp.Database.ModelDb.Cart;
-import com.ecommerce.ecommerceapp.Database.ModelDb.Favorites;
 import com.ecommerce.ecommerceapp.R;
 import com.ecommerce.ecommerceapp.Utils.Common;
 import com.squareup.picasso.Picasso;
@@ -81,7 +80,7 @@ public class CartAdapter extends RecyclerView.Adapter<CartAdapter.CartViewHolder
     }
 
 
-    public class CartViewHolder extends RecyclerView.ViewHolder
+    public static class CartViewHolder extends RecyclerView.ViewHolder
     {
         ImageView prod_image;
         TextView txt_product_name,txt_sugar_ice,txt_price;

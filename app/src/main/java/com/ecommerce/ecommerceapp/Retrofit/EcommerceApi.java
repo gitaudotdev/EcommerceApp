@@ -1,11 +1,12 @@
 package com.ecommerce.ecommerceapp.Retrofit;
 
 
-        import com.ecommerce.ecommerceapp.Model.Banner;
+import com.ecommerce.ecommerceapp.Model.Banner;
         import com.ecommerce.ecommerceapp.Model.Category;
         import com.ecommerce.ecommerceapp.Model.CheckUserResponse;
         import com.ecommerce.ecommerceapp.Model.Drink;
-        import com.ecommerce.ecommerceapp.Model.User;
+import com.ecommerce.ecommerceapp.Model.Order;
+import com.ecommerce.ecommerceapp.Model.User;
 
 
         import java.util.List;
@@ -61,6 +62,9 @@ public interface EcommerceApi {
                              @Field("address")String address,
                              @Field("phone")String phone);
 
-
+    @FormUrlEncoded
+    @POST("getorders.php")
+    Observable<List<Order>> getOrder(@Field("userPhone") String phone,
+                                     @Field("status") String status);
 
 }

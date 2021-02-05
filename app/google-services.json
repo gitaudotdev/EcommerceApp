@@ -1,0 +1,39 @@
+{
+  "project_info": {
+    "project_number": "528264787815",
+    "project_id": "drinkshop-52f54",
+    "storage_bucket": "drinkshop-52f54.appspot.com"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:528264787815:android:2b40f2441f1478d8fda1c2",
+        "android_client_info": {
+          "package_name": "com.ecommerce.ecommerceapp"
+        }
+      },
+      "oauth_client": [
+        {
+          "client_id": "528264787815-c53o8mppb49vi3henap8140kmk8632li.apps.googleusercontent.com",
+          "client_type": 3
+        }
+      ],
+      "api_key": [
+        {
+          "current_key": "AIzaSyC1qqrKbQEy-eaAFkt3e6y7WT-NxJfmDow"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": [
+            {
+              "client_id": "528264787815-c53o8mppb49vi3henap8140kmk8632li.apps.googleusercontent.com",
+              "client_type": 3
+            }
+          ]
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}

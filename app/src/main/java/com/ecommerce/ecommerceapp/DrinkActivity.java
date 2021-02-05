@@ -1,17 +1,16 @@
 package com.ecommerce.ecommerceapp;
 
-import android.support.v7.app.AlertDialog;
-import android.support.v7.app.AppCompatActivity;
+import androidx.appcompat.app.AlertDialog;
+import androidx.appcompat.app.AppCompatActivity;
 import android.os.Bundle;
-import android.support.v7.widget.GridLayoutManager;
-import android.support.v7.widget.LinearLayoutManager;
-import android.support.v7.widget.RecyclerView;
-import android.view.View;
+import androidx.recyclerview.widget.GridLayoutManager;
+import androidx.recyclerview.widget.RecyclerView;
+import androidx.swiperefreshlayout.widget.SwipeRefreshLayout;
+
 import android.widget.Button;
 import android.widget.TextView;
 import android.widget.Toast;
 
-import com.ecommerce.ecommerceapp.Adapters.CategoryAdapter;
 import com.ecommerce.ecommerceapp.Adapters.DrinkAdapter;
 import com.ecommerce.ecommerceapp.Model.Drink;
 import com.ecommerce.ecommerceapp.Retrofit.EcommerceApi;
@@ -34,6 +33,7 @@ public class DrinkActivity extends AppCompatActivity {
     TextView txt_banner_name;
     Button btn_add;
 
+    SwipeRefreshLayout refreshLayout;
 
     //rxjava
     CompositeDisposable compositeDisposable = new CompositeDisposable();
@@ -55,9 +55,27 @@ public class DrinkActivity extends AppCompatActivity {
         txt_banner_name.setText(Common.currentCategory.Name);
 
 
+        refreshLayout = findViewById(R.id.drink_refresh);
 
 
-        loadListDrink(Common.currentCategory.ID);
+        refreshLayout.post(new Runnable() {
+            @Override
+            public void run() {
+                refreshLayout.setRefreshing(true);
+
+                loadListDrink(Common.currentCategory.ID);
+            }
+        });
+
+        refreshLayout.setOnRefreshListener(new SwipeRefreshLayout.OnRefreshListener() {
+            @Override
+            public void onRefresh() {
+                refreshLayout.setRefreshing(true);
+
+                loadListDrink(Common.currentCategory.ID);
+            }
+        });
+
     }
 
     private void loadListDrink(String menuID) {
@@ -75,6 +93,7 @@ public class DrinkActivity extends AppCompatActivity {
     private void displayDrinkList(List<Drink> drinks) {
         DrinkAdapter adapter = new DrinkAdapter(this,drinks);
         drink_list.setAdapter(adapter);
+        refreshLayout.setRefreshing(false);
     }
 
     //Exit application when we click back button

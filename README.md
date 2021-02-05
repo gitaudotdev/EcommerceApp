@@ -1,2 +1,2 @@
 # EcommerceApp
-Admin app for drinkshop app
+Client app for drinkshop app

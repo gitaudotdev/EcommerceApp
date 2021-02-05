@@ -3,13 +3,13 @@ package com.ecommerce.ecommerceapp;
 import android.content.DialogInterface;
 import android.content.Intent;
 import android.graphics.Color;
-import android.support.design.widget.Snackbar;
-import android.support.v7.app.AlertDialog;
-import android.support.v7.app.AppCompatActivity;
+import com.google.android.material.snackbar.Snackbar;
+import androidx.appcompat.app.AlertDialog;
+import androidx.appcompat.app.AppCompatActivity;
 import android.os.Bundle;
-import android.support.v7.widget.LinearLayoutManager;
-import android.support.v7.widget.RecyclerView;
-import android.support.v7.widget.helper.ItemTouchHelper;
+import androidx.recyclerview.widget.LinearLayoutManager;
+import androidx.recyclerview.widget.RecyclerView;
+import androidx.recyclerview.widget.ItemTouchHelper;
 import android.text.TextUtils;
 import android.util.Log;
 import android.view.LayoutInflater;
@@ -22,9 +22,7 @@ import android.widget.RelativeLayout;
 import android.widget.Toast;
 
 import com.ecommerce.ecommerceapp.Adapters.CartAdapter;
-import com.ecommerce.ecommerceapp.Adapters.FavoritesAdapter;
 import com.ecommerce.ecommerceapp.Database.ModelDb.Cart;
-import com.ecommerce.ecommerceapp.Database.ModelDb.Favorites;
 import com.ecommerce.ecommerceapp.Retrofit.EcommerceApi;
 import com.ecommerce.ecommerceapp.Utils.Common;
 import com.ecommerce.ecommerceapp.Utils.RecyclerItemTouchHelper;
@@ -261,7 +259,7 @@ public class CartActivity extends AppCompatActivity implements RecyclerItemTouch
             //Delete from Room Database
             Common.sCartRepository.deleteCartItem(deletedItem);
 
-            Snackbar snackbar = Snackbar.make(rootLayout,new StringBuilder(name).append("removed from your Cart").toString(),Snackbar.LENGTH_LONG);
+            Snackbar snackbar = Snackbar.make(rootLayout, name + "removed from your Cart",Snackbar.LENGTH_LONG);
             snackbar.setAction("UNDO", new View.OnClickListener() {
                 @Override
                 public void onClick(View view) {

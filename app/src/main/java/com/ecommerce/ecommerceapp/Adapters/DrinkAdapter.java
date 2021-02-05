@@ -3,9 +3,9 @@ package com.ecommerce.ecommerceapp.Adapters;
 import android.app.AlertDialog;
 import android.content.Context;
 import android.content.DialogInterface;
-import android.support.annotation.NonNull;
-import android.support.v7.widget.LinearLayoutManager;
-import android.support.v7.widget.RecyclerView;
+import androidx.annotation.NonNull;
+import androidx.recyclerview.widget.LinearLayoutManager;
+import androidx.recyclerview.widget.RecyclerView;
 import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
@@ -294,10 +294,11 @@ public class DrinkAdapter extends RecyclerView.Adapter<DrinkViewHolder> {
 
         //set data
         Picasso.with(context).load(drinkList.get(position).Link).into(prod_image);
-        txt_prod_dialog.setText(new StringBuilder(drinkList.get(position).Name).append("x")
-                .append(Common.sizeOfCup == 0 ? "Size M":"Size L").append(number).toString());
+        txt_prod_dialog.setText(new StringBuilder().append(drinkList.get(position).Name)
+                .append("x").append(Common.sizeOfCup == 0 ? "Size M" : "Size L")
+                .append(number).toString());
 
-        txt_ice.setText(new StringBuilder("Ice: ").append(Common.ice).append("%").toString());
+        txt_ice.setText(new StringBuilder().append("Ice: ").append(Common.ice).append("%").toString());
         txt_sugar.setText(new StringBuilder("Sugar: ").append(Common.sugar).append("%").toString());
 
         double price = (Double.parseDouble(drinkList.get(position).Price)*Double.parseDouble(number))+ Common.toppingsPrice;

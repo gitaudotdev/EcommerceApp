@@ -1,28 +1,30 @@
 package com.ecommerce.ecommerceapp;
 
+import android.accounts.Account;
 import android.app.Activity;
 import android.app.AlertDialog;
 import android.app.ProgressDialog;
-import android.content.Context;
 import android.content.DialogInterface;
 import android.content.Intent;
 import android.net.Uri;
 import android.os.Bundle;
-import android.support.annotation.Nullable;
-import android.support.design.widget.FloatingActionButton;
-import android.support.design.widget.Snackbar;
-import android.support.multidex.MultiDex;
-import android.support.v7.widget.LinearLayoutManager;
-import android.support.v7.widget.RecyclerView;
+import androidx.annotation.Nullable;
+import com.google.android.material.floatingactionbutton.FloatingActionButton;
+import com.google.android.material.snackbar.Snackbar;
+
+import androidx.recyclerview.widget.LinearLayoutManager;
+import androidx.recyclerview.widget.RecyclerView;
 import android.text.TextUtils;
 import android.util.Log;
 import android.view.View;
-import android.support.design.widget.NavigationView;
-import android.support.v4.view.GravityCompat;
-import android.support.v4.widget.DrawerLayout;
-import android.support.v7.app.ActionBarDrawerToggle;
-import android.support.v7.app.AppCompatActivity;
-import android.support.v7.widget.Toolbar;
+import com.google.android.material.navigation.NavigationView;
+import androidx.core.view.GravityCompat;
+import androidx.drawerlayout.widget.DrawerLayout;
+import androidx.appcompat.app.ActionBarDrawerToggle;
+import androidx.appcompat.app.AppCompatActivity;
+import androidx.appcompat.widget.Toolbar;
+import androidx.swiperefreshlayout.widget.SwipeRefreshLayout;
+
 import android.view.Menu;
 import android.view.MenuItem;
 import android.widget.ImageView;
@@ -48,10 +50,9 @@ import com.ecommerce.ecommerceapp.Retrofit.EcommerceApi;
 import com.ecommerce.ecommerceapp.Utils.Common;
 import com.ecommerce.ecommerceapp.Utils.ProgressRequestBody;
 import com.ecommerce.ecommerceapp.Utils.UploadCallBack;
-import com.facebook.accountkit.Account;
-import com.facebook.accountkit.AccountKit;
-import com.facebook.accountkit.AccountKitCallback;
-import com.facebook.accountkit.AccountKitError;
+
+import com.google.firebase.auth.FirebaseAuth;
+import com.google.firebase.auth.FirebaseUser;
 import com.ipaulpro.afilechooser.utils.FileUtils;
 import com.nex3z.notificationbadge.NotificationBadge;
 import com.squareup.picasso.Picasso;
@@ -96,11 +97,7 @@ public class HomeActivity extends AppCompatActivity
     //rxjava
     CompositeDisposable compositeDisposable = new CompositeDisposable();
 
-    protected void attachBaseContext(Context base)
-    {
-        super.attachBaseContext(base);
-        MultiDex.install(this);
-    }
+    SwipeRefreshLayout swipeRefreshLayout;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -117,14 +114,8 @@ public class HomeActivity extends AppCompatActivity
         menu_list.setLayoutManager(new LinearLayoutManager(this,LinearLayoutManager.HORIZONTAL,false));
         menu_list.setHasFixedSize(true);
 
-        FloatingActionButton fab = (FloatingActionButton) findViewById(R.id.fab);
-        fab.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View view) {
-                Snackbar.make(view, "Replace with your own action", Snackbar.LENGTH_LONG)
-                        .setAction("Action", null).show();
-            }
-        });
+
+        swipeRefreshLayout = findViewById(R.id.refreshLayout);
 
         DrawerLayout drawer = (DrawerLayout) findViewById(R.id.drawer_layout);
         ActionBarDrawerToggle toggle = new ActionBarDrawerToggle(
@@ -151,31 +142,38 @@ public class HomeActivity extends AppCompatActivity
             }
         });
 
-        if(Common.currentUser !=null) // when we are not logged in current user is obviously null
-        {
 
-            //setInfo
-            tvName.setText(Common.currentUser.getName());
-            tvPhone.setText(Common.currentUser.getPhone());
 
-            //setAvatar image
-            if (!TextUtils.isEmpty(Common.currentUser.getAvatarUrl())) {
-                Picasso.with(this)
-                        .load(new StringBuilder(Common.BASE_URL)
-                                .append("user_avatar/")
-                                .append(Common.currentUser.getAvatarUrl()).toString())
-                        .into(avatar);
+        swipeRefreshLayout.post(new Runnable(){
+            @Override
+            public void run(){
+                //Get Banner
+                getBannerImage();
+
+                //Get Menu
+                getMenu();
+
+                //save newest toppings list
+                getToppingList();
             }
-        }
+        });
 
-        //Get Banner
-        getBannerImage();
+        swipeRefreshLayout.setOnRefreshListener(new SwipeRefreshLayout.OnRefreshListener() {
+            @Override
+            public void onRefresh() {
+                swipeRefreshLayout.setRefreshing(true);
 
-        //Get Menu
-        getMenu();
+                //Get Banner
+                getBannerImage();
 
-        //save newest toppings list
-        getToppingList();
+                //Get Menu
+                getMenu();
+
+                //save newest toppings list
+                getToppingList();
+            }
+        });
+
 
 
         //Init Database
@@ -186,61 +184,77 @@ public class HomeActivity extends AppCompatActivity
     }
 
     private void checkSessionLogin() {
-        if(AccountKit.getCurrentAccessToken() !=null)
+        final FirebaseUser user = FirebaseAuth.getInstance().getCurrentUser();
+
+        if(user !=null)
         {
-            final AlertDialog dialog = new ProgressDialog(this);
-            dialog.show();
-            dialog.setMessage("Please Wait....");
+            swipeRefreshLayout.setRefreshing(true);
 
-            //check if user exists on server(MySQL)
-            AccountKit.getCurrentAccount(new AccountKitCallback<Account>() {
-                @Override
-                public void onSuccess(final Account account) {
-                    mService.checkUserExists(account.getPhoneNumber().toString())
-                            .enqueue(new Callback<CheckUserResponse>() {
-                                @Override
-                                public void onResponse(Call<CheckUserResponse> call, Response<CheckUserResponse> response) {
-                                    CheckUserResponse userResponse = response.body();
-                                    if(userResponse.isExists())
-                                    {
-                                        //Request Information of Current User
-                                        mService.getUserInformation(account.getPhoneNumber().toString())
-                                                .enqueue(new Callback<User>() {
-                                                    @Override
-                                                    public void onResponse(Call<User> call, Response<User> response) {
-                                                        Common.currentUser = response.body();
-                                                        if(Common.currentUser !=null)
-                                                            dialog.dismiss();
+
+            mService.checkUserExists(user.getPhoneNumber())
+                    .enqueue(new Callback<CheckUserResponse>() {
+                        @Override
+                        public void onResponse(Call<CheckUserResponse> call, Response<CheckUserResponse> response) {
+                            CheckUserResponse userResponse = response.body();
+                            if(userResponse.isExists())
+                            {
+                                //Request Information of Current User
+                                mService.getUserInformation(user.getPhoneNumber())
+                                        .enqueue(new Callback<User>() {
+                                            @Override
+                                            public void onResponse(Call<User> call, Response<User> response) {
+                                                Common.currentUser = response.body();
+                                                if(Common.currentUser !=null){
+                                                    swipeRefreshLayout.setRefreshing(false);
+
+                                                    //setInfo
+                                                    tvName.setText(Common.currentUser.getName());
+                                                    tvPhone.setText(Common.currentUser.getPhone());
+
+                                                    //setAvatar image
+                                                    if (!TextUtils.isEmpty(Common.currentUser.getAvatarUrl())) {
+                                                        Picasso.with(getBaseContext())
+                                                                .load(Common.BASE_URL +
+                                                                        "user_avatar/" +
+                                                                        Common.currentUser.getAvatarUrl())
+                                                                .into(avatar);
                                                     }
+                                                }
 
-                                                    @Override
-                                                    public void onFailure(Call<User> call, Throwable t) {
-                                                        dialog.dismiss();
-                                                        Log.d("ERROR",t.getMessage());
+                                            }
 
-                                                    }
-                                                });
-                                    }else
-                                    {
-                                        //if user doesnt exist on database we make them login
-                                        startActivity(new Intent(HomeActivity.this,MainActivity.class));
-                                        finish();
-                                    }
-                                }
+                                            @Override
+                                            public void onFailure(Call<User> call, Throwable t) {
+                                                swipeRefreshLayout.setRefreshing(false);
+                                                Log.d("ERROR",t.getMessage());
 
-                                @Override
-                                public void onFailure(Call<CheckUserResponse> call, Throwable t) {
-                                    Log.d("ERROR",t.getMessage());
-                                }
-                            });
-                }
+                                            }
+                                        });
+                            }else
+                            {
+                                //if user doesnt exist on database we make them login
+                                startActivity(new Intent(HomeActivity.this,MainActivity.class));
+                                finish();
+                            }
+                        }
 
-                @Override
-                public void onError(AccountKitError accountKitError) {
-                    Log.d("ERROR",accountKitError.getErrorType().getMessage());
-                }
-            });
+                        @Override
+                        public void onFailure(Call<CheckUserResponse> call, Throwable t) {
+                            Log.d("ERROR",t.getMessage());
+                        }
+                    });
 
+
+
+        }
+        else{
+            FirebaseAuth.getInstance().signOut();
+
+            //clear all activity
+            Intent intent = new Intent(HomeActivity.this, MainActivity.class);
+            intent.addFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP);
+            startActivity(intent);
+            finish();
         }
     }
 
@@ -275,9 +289,8 @@ public class HomeActivity extends AppCompatActivity
      {
          File file = FileUtils.getFile(this,selectedFileUri);
 
-         String fileName = new StringBuilder(Common.currentUser.getPhone())
-                 .append(FileUtils.getExtension(file.toString()))
-                 .toString();
+         String fileName = Common.currentUser.getPhone() +
+                 FileUtils.getExtension(file.toString());
 
          ProgressRequestBody requestFile = new ProgressRequestBody(file,this);
 
@@ -339,6 +352,7 @@ public class HomeActivity extends AppCompatActivity
     private void displayMenu(List<Category> categories) {
         adapter = new CategoryAdapter(this,categories);
         menu_list.setAdapter(adapter);
+        swipeRefreshLayout.setRefreshing(false);
     }
 
     private void getBannerImage() {
@@ -373,6 +387,8 @@ public class HomeActivity extends AppCompatActivity
 
             sliderLayout.addSlider(textSliderView);
         }
+
+
     }
 
     //Exit application when we click back button
@@ -459,7 +475,7 @@ public class HomeActivity extends AppCompatActivity
             builder.setNegativeButton("YES", new DialogInterface.OnClickListener() {
                 @Override
                 public void onClick(DialogInterface dialogInterface, int i) {
-                    AccountKit.logOut();
+                   FirebaseAuth.getInstance().signOut();
 
                     //Clear all activity
                     Intent intent = new Intent(HomeActivity.this,MainActivity.class);
@@ -476,8 +492,11 @@ public class HomeActivity extends AppCompatActivity
             });
 
             builder.show();
-        }else if(id == R.id.nav_favorites){
+        }
+        else if(id == R.id.nav_favorites){
             startActivity(new Intent(HomeActivity.this,FavoritesListActivity.class));
+        }else if(id == R.id.nav_orders){
+            startActivity(new Intent(HomeActivity.this,OrdersActivity.class));
         }
 
         DrawerLayout drawer = (DrawerLayout) findViewById(R.id.drawer_layout);
